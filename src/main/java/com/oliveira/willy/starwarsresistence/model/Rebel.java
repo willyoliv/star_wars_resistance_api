@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
@@ -30,14 +31,16 @@ public class Rebel {
     @JoinColumn(name = "inventory_id", referencedColumnName = "id")
     private Inventory inventory;
 
-//    @OneToMany(mappedBy = "rebel", cascade = CascadeType.ALL)
-//    private List<Item> inventory;
-//
-//    public void setRebelToItem() {
-//        if (!inventory.isEmpty()) {
-//            for (Item item : inventory) {
-//                item.setRebel(this);
-//            }
-//        }
-//    }
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void save() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void update() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

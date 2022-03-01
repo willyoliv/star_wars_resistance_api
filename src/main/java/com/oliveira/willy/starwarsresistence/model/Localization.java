@@ -1,19 +1,19 @@
 package com.oliveira.willy.starwarsresistence.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Localization {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter
+    @Setter
     private Long id;
 
     @Getter
@@ -31,4 +31,22 @@ public class Localization {
     @OneToOne(mappedBy = "localization")
     @Setter
     private Rebel rebel;
+
+    @Getter
+    @Setter
+    private LocalDateTime createdAt;
+
+    @Getter
+    @Setter
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void save() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void update() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }
