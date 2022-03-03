@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -30,6 +31,9 @@ public class Rebel {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "inventory_id", referencedColumnName = "id")
     private Inventory inventory;
+
+    @OneToMany(mappedBy = "accused",cascade = CascadeType.ALL)
+    private List<Report> report;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

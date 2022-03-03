@@ -2,6 +2,7 @@ package com.oliveira.willy.starwarsresistence.controller;
 
 import com.oliveira.willy.starwarsresistence.dto.LocalizationDto;
 import com.oliveira.willy.starwarsresistence.dto.RebelCreateDto;
+import com.oliveira.willy.starwarsresistence.dto.ReportDto;
 import com.oliveira.willy.starwarsresistence.mapper.LocalizationMapper;
 import com.oliveira.willy.starwarsresistence.mapper.RebelMapper;
 import com.oliveira.willy.starwarsresistence.model.Localization;
@@ -36,10 +37,16 @@ public class RebelController {
         return new ResponseEntity<>(rebelService.saveRebel(rebel), HttpStatus.CREATED);
     }
 
-    @PutMapping(path = "/{rebelId}/update_localization")
-    private ResponseEntity<Void> updateRebelLocation(@PathVariable(value = "rebelId") Long rebelId, @Valid @RequestBody LocalizationDto localizationDto) {
+    @PutMapping(path = "/{rebelId}/update-localization")
+    private ResponseEntity<Void> updateRebelLocation(@PathVariable("rebelId") Long rebelId, @Valid @RequestBody LocalizationDto localizationDto) {
         Localization localization = localizationMapper.localizationDTOToLocalization(localizationDto);
         rebelService.updateRebelLocation(rebelId, localization);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping(path = "/{accuserId}/report-traitor")
+    private ResponseEntity<Void> reportRebelTraitor(@PathVariable("accuserId") Long accuserId, @RequestBody ReportDto reportDto) {
+        rebelService.reportRebelTraitor(accuserId, reportDto.getAccusedId(), reportDto.getReason());
+        return ResponseEntity.noContent().build();
     }
 }

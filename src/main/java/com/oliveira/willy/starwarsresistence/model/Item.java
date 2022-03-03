@@ -25,7 +25,7 @@ public class Item {
 
     @Getter
     @Setter
-    private int value;
+    private int quantity;
 
     @ManyToOne
     @JoinColumn

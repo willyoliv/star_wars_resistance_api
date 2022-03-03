@@ -15,5 +15,5 @@ public class ItemDto {
     private ItemInventory name;
 
     @NotNull(message = "The value field cannot be null")
-    private int value;
+    private int quantity;
 }
