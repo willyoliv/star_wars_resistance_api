@@ -1,5 +1,6 @@
 package com.oliveira.willy.starwarsresistence.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -9,6 +10,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Setter
+@Getter
 public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,12 +18,13 @@ public class Report {
 
     @ManyToOne()
     @JoinColumn(name = "accused_id")
+    @JsonBackReference
     private Rebel accused;
 
     @ManyToOne()
     @JoinColumn(name = "accuser_id")
+    @JsonBackReference
     private Rebel accuser;
 
-    @Getter
     private String reason;
 }

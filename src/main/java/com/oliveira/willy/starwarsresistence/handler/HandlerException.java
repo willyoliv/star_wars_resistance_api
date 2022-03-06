@@ -1,15 +1,11 @@
 package com.oliveira.willy.starwarsresistence.handler;
 
-import com.oliveira.willy.starwarsresistence.exception.ExceptionDetails;
-import com.oliveira.willy.starwarsresistence.exception.RebelNotFoundException;
-import com.oliveira.willy.starwarsresistence.exception.RebelNotFoundExceptionDetails;
-import com.oliveira.willy.starwarsresistence.exception.ValidationExceptionDetails;
+import com.oliveira.willy.starwarsresistence.exception.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.FieldError;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -24,8 +20,8 @@ import java.util.stream.Collectors;
 public class HandlerException extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(RebelNotFoundException.class)
-    public ResponseEntity<RebelNotFoundExceptionDetails> handlerRebelNOtFoundException(RebelNotFoundException rebelNotFoundException) {
-        return new ResponseEntity<>(RebelNotFoundExceptionDetails.builder()
+    public ResponseEntity<ExceptionDetails> handlerRebelNotFoundException(RebelNotFoundException rebelNotFoundException) {
+        return new ResponseEntity<>(ExceptionDetails.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.NOT_FOUND.value())
                 .title("Not found Exception, Rebel not found!")
@@ -33,6 +29,40 @@ public class HandlerException extends ResponseEntityExceptionHandler {
                 .developerMessage(rebelNotFoundException.getClass().getName())
                 .build(), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(InvalidReportException.class)
+    public ResponseEntity<ExceptionDetails> handlerInvalidReportException(InvalidReportException invalidReportException) {
+        return new ResponseEntity<>(ExceptionDetails.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .title("Invalid report Exception, Report invalid")
+                .details(invalidReportException.getMessage())
+                .developerMessage(invalidReportException.getClass().getName())
+                .build(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DuplicateItemsInventoryException.class)
+    public ResponseEntity<ExceptionDetails> handlerDuplicateItemsInventoryException(DuplicateItemsInventoryException duplicateItemsInventoryException) {
+        return new ResponseEntity<>(ExceptionDetails.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .title("Invalid report Exception, Report invalid")
+                .details(duplicateItemsInventoryException.getMessage())
+                .developerMessage(duplicateItemsInventoryException.getClass().getName())
+                .build(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidTradeException.class)
+    public ResponseEntity<ExceptionDetails> handlerInvalidTradeException(InvalidTradeException invalidTradeException) {
+        return new ResponseEntity<>(ExceptionDetails.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .title("Invalid trade Exception, Trade invalid")
+                .details(invalidTradeException.getMessage())
+                .developerMessage(invalidTradeException.getClass().getName())
+                .build(), HttpStatus.BAD_REQUEST);
+    }
+
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
@@ -66,17 +96,5 @@ public class HandlerException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(exceptionDetails, headers, status);
     }
 
-//    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-//    public ResponseEntity<Object> httpRequestMethodNotSupportedException(
-//            Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatus status, WebRequest request
-//    ) {
-//        ExceptionDetails exceptionDetails = ExceptionDetails.builder()
-//                .timestamp(LocalDateTime.now())
-//                .status(status.value())
-//                .title(ex.getCause().getMessage())
-//                .details(ex.getMessage())
-//                .developerMessage(ex.getClass().getName())
-//                .build();
-//        return new ResponseEntity<>(exceptionDetails, headers, status);
-//    }
+
 }

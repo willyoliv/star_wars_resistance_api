@@ -1,5 +1,7 @@
 package com.oliveira.willy.starwarsresistence.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,25 +14,22 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class Inventory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter
-    @Setter
     private Long id;
 
 
     @OneToMany(mappedBy = "inventory", cascade = CascadeType.ALL)
-    @Setter
-    @Getter
+    @JsonManagedReference
     private List<Item> items;
 
     @OneToOne(mappedBy = "inventory")
-    @Setter
+    @JsonBackReference
     private Rebel rebel;
 
-    @Setter
-    @Getter
     private boolean isBlocked;
 
     public void setInventoryToItem() {

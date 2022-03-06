@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
-public class ReportDto {
+public class ReportCreateDto {
     @NotNull(message = "The accusedId field cannot be null")
     private Long accusedId;
 

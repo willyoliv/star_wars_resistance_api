@@ -1,5 +1,6 @@
 package com.oliveira.willy.starwarsresistence.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.oliveira.willy.starwarsresistence.model.enums.Genre;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,17 +23,22 @@ public class Rebel {
 
     private String name;
     private int age;
+
+    @Enumerated(EnumType.STRING)
     private Genre genre;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "localization_id", referencedColumnName = "id")
-    private Localization localization;
+    @JoinColumn(name = "location_id", referencedColumnName = "id")
+    @JsonManagedReference
+    private Location location;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "inventory_id", referencedColumnName = "id")
+    @JsonManagedReference
     private Inventory inventory;
 
     @OneToMany(mappedBy = "accused",cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Report> report;
 
     private LocalDateTime createdAt;

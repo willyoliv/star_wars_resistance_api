@@ -1,5 +1,6 @@
 package com.oliveira.willy.starwarsresistence.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -9,35 +10,25 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Localization {
+@Getter
+@Setter
+public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter
-    @Setter
     private Long id;
 
-    @Getter
-    @Setter
     private String galaxyName;
 
-    @Getter
-    @Setter
-    private float latitude;
+    private Long latitude;
 
-    @Getter
-    @Setter
-    private float longitude;
+    private Long longitude;
 
-    @OneToOne(mappedBy = "localization")
-    @Setter
+    @OneToOne(mappedBy = "location")
+    @JsonBackReference
     private Rebel rebel;
 
-    @Getter
-    @Setter
     private LocalDateTime createdAt;
 
-    @Getter
-    @Setter
     private LocalDateTime updatedAt;
 
     @PrePersist

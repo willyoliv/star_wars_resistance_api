@@ -10,10 +10,12 @@ import java.util.List;
 
 @Getter
 @Setter
-public class InventoryDto {
+public class RebelTradeDto {
+    @NotNull(message = "The rebelId field cannot be empty or null")
+    private Long rebelId;
 
     @NotNull(message = "The items field cannot be empty or null")
-    @Size(min = 4, max = 4, message = "The items field must contain four items: { WEAPON, MUNITION, WATER and FOOD}")
+    @Size(min = 1, max = 4, message = "The items field must contain between 1 to 4 items")
     @Valid
     private List<ItemDto> items;
 }

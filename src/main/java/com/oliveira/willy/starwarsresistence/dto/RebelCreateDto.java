@@ -4,6 +4,7 @@ import com.oliveira.willy.starwarsresistence.model.enums.Genre;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -20,8 +21,10 @@ public class RebelCreateDto {
     private Genre genre;
 
     @NotNull(message = "The localization field cannot be null")
-    private LocalizationDto localization;
+    @Valid
+    private LocationDto location;
 
     @NotNull(message = "The inventory field cannot be null")
+    @Valid
     private InventoryDto inventory;
 }
