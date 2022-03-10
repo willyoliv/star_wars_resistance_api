@@ -27,6 +27,8 @@ public class RebelService {
 
     private final ReportRepository reportRepository;
 
+    private int inventorySize = ItemInventory.values().length;
+
     @Value("${maximumNumberOfReport}")
     private int maximumNumberOfReport;
 
@@ -36,15 +38,9 @@ public class RebelService {
 
     @Transactional
     public Rebel saveRebel(Rebel rebel) {
-        int itemsInRebelInventorySize = rebel.getInventory().getItems().stream()
-                .map(Item::getName)
-                .distinct()
-                .collect(Collectors.toList())
-                .size();
+        int itemsInRebelInventorySize = countDistinctItemsInInventory(rebel.getInventory().getItems());
 
-        int itemInventorySize = ItemInventory.values().length;
-
-        if (itemsInRebelInventorySize != itemInventorySize) {
+        if (itemsInRebelInventorySize != inventorySize) {
             throw new DuplicateItemsInventoryException("There are duplicate items in the inventory");
         }
         rebel.getInventory().setInventoryToItem();
@@ -97,11 +93,50 @@ public class RebelService {
             throw new InvalidTradeException("The rebel cannot trade with himself.");
         }
 
+        validateDuplicateItemsInRequestInventory(fromRebelItems);
+        validateDuplicateItemsInRequestInventory(toRebelItems);
+
+        getRebelItemForTrade(fromRebel, fromRebelItems);
+
     }
 
     private void checkIfRebelIsATraitor(Rebel rebel) {
         if (rebel.getInventory().isBlocked()) {
-            throw new InvalidTradeException("Trade invalid. The rebel ID " + rebel.getId() +" is a traitor! Be careful!");
+            throw new InvalidTradeException("Trade invalid. The rebel ID " + rebel.getId() + " is a traitor! Be careful!");
         }
+    }
+
+    private void validateDuplicateItemsInRequestInventory(List<Item> rebelItemsFromRequest) {
+        int rebelItemsFromRequestSize = countDistinctItemsInInventory(rebelItemsFromRequest);
+        if (rebelItemsFromRequestSize < rebelItemsFromRequest.size()) {
+            throw new DuplicateItemsInventoryException("Cannot pass duplicate items for exchange.");
+        }
+    }
+
+    private int countDistinctItemsInInventory(List<Item> items) {
+        int itemsSize = items.stream()
+                .map(Item::getName)
+                .distinct()
+                .collect(Collectors.toList())
+                .size();
+        return itemsSize;
+    }
+
+    private List<Item> getRebelItemForTrade(Rebel rebel, List<Item> rebelItemsFromRequest) {
+        List<Item> itemsForTrade = rebel.getInventory().getItems().stream()
+                .filter((rebelItem) -> rebelItemsFromRequest.stream()
+                        .anyMatch((itemFromRequest) -> {
+                            if (itemFromRequest.getName().equals(rebelItem.getName())) {
+                                if (rebelItem.getQuantity() >= itemFromRequest.getQuantity()) {
+                                    return true;
+                                } else {
+                                    throw new InvalidTradeException("adicionar a mensagem aqui de erro aqui");
+                                }
+                            }
+                            return false;
+                        }))
+                .collect(Collectors.toList());
+
+        return itemsForTrade;
     }
 }
