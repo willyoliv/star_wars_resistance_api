@@ -1,8 +1,14 @@
 package com.oliveira.willy.starwarsresistence.model.enums;
 
 public enum ItemInventory {
-    WEAPON,
-    MUNITION,
-    WATER,
-    FOOD
+    WEAPON(4),
+    MUNITION(3),
+    WATER(2),
+    FOOD(1);
+
+    public final int value;
+
+    private ItemInventory(int value) {
+        this.value = value;
+    }
 }

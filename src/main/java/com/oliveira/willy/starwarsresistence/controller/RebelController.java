@@ -56,7 +56,7 @@ public class RebelController {
     }
 
     @PostMapping(path = "/trade")
-    public ResponseEntity<SuccessMessage> exchangeItemsBetweemRebels(@Valid @RequestBody TradeDto tradeDto) {
+    public ResponseEntity<SuccessMessage> tradeItemsBetweemRebels(@Valid @RequestBody TradeDto tradeDto) {
         Rebel fromRebel = rebelService.findRebelById(tradeDto.getFromRebel().getRebelId());
         Rebel toRebel = rebelService.findRebelById(tradeDto.getToRebel().getRebelId());
         List<Item> fromRebelItems = tradeDto.getFromRebel().getItems().stream()

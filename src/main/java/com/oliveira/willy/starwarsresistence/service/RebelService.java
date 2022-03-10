@@ -27,7 +27,7 @@ public class RebelService {
 
     private final ReportRepository reportRepository;
 
-    private int inventorySize = ItemInventory.values().length;
+    private final int inventorySize = ItemInventory.values().length;
 
     @Value("${maximumNumberOfReport}")
     private int maximumNumberOfReport;
@@ -96,7 +96,17 @@ public class RebelService {
         validateDuplicateItemsInRequestInventory(fromRebelItems);
         validateDuplicateItemsInRequestInventory(toRebelItems);
 
-        getRebelItemForTrade(fromRebel, fromRebelItems);
+        List<Item> fromRebelItemsToTrade = getRebelItemForTrade(fromRebel, fromRebelItems);
+        List<Item> toRebelItemsToTrade = getRebelItemForTrade(toRebel, toRebelItems);
+
+        int fromRebelItemsPoints = getSumOfItemPoints(fromRebelItemsToTrade);
+        int toRebelItemsPoints = getSumOfItemPoints(toRebelItemsToTrade);
+
+        if (toRebelItemsPoints != fromRebelItemsPoints) {
+            throw new InvalidTradeException("The sum of rebel item points are not equivalent.");
+        }
+
+        System.out.println(fromRebelItemsToTrade.get(0).getId());
 
     }
 
@@ -109,34 +119,61 @@ public class RebelService {
     private void validateDuplicateItemsInRequestInventory(List<Item> rebelItemsFromRequest) {
         int rebelItemsFromRequestSize = countDistinctItemsInInventory(rebelItemsFromRequest);
         if (rebelItemsFromRequestSize < rebelItemsFromRequest.size()) {
-            throw new DuplicateItemsInventoryException("Cannot pass duplicate items for exchange.");
+            throw new DuplicateItemsInventoryException("Cannot pass duplicate items for trade.");
         }
     }
 
     private int countDistinctItemsInInventory(List<Item> items) {
-        int itemsSize = items.stream()
+        return items.stream()
                 .map(Item::getName)
                 .distinct()
                 .collect(Collectors.toList())
                 .size();
-        return itemsSize;
     }
 
     private List<Item> getRebelItemForTrade(Rebel rebel, List<Item> rebelItemsFromRequest) {
-        List<Item> itemsForTrade = rebel.getInventory().getItems().stream()
+        return rebel.getInventory().getItems().stream()
                 .filter((rebelItem) -> rebelItemsFromRequest.stream()
                         .anyMatch((itemFromRequest) -> {
                             if (itemFromRequest.getName().equals(rebelItem.getName())) {
                                 if (rebelItem.getQuantity() >= itemFromRequest.getQuantity()) {
                                     return true;
                                 } else {
-                                    throw new InvalidTradeException("adicionar a mensagem aqui de erro aqui");
+                                    throw new InvalidTradeException("The quantity of item " + itemFromRequest.getName() + " exceeds the saved quantity.");
                                 }
                             }
                             return false;
                         }))
                 .collect(Collectors.toList());
+    }
 
-        return itemsForTrade;
+    private int getSumOfItemPoints(List<Item> items) {
+        return items.stream()
+                .map((item) -> item.getQuantity() + item.getName().value)
+                .reduce(0, (total, itemValue) -> total + itemValue );
+    }
+
+    private List<Item> subtrair(List<Item> fullInventory, List<Item> itemsToTrade) {
+        for (Item itemToTrade: itemsToTrade) {
+            for (Item itemFullInventory: fullInventory) {
+                if (itemFullInventory.getName().equals(itemToTrade.getName())) {
+                    itemFullInventory.setQuantity(itemFullInventory.getQuantity() - itemToTrade.getQuantity());
+                    break;
+                }
+            }
+        }
+        return fullInventory;
+    }
+
+    private List<Item> soma(List<Item> fullInventory, List<Item> itemsToTrade) {
+        for (Item itemToTrade: itemsToTrade) {
+            for (Item itemFullInventory: fullInventory) {
+                if (itemFullInventory.getName().equals(itemToTrade.getName())) {
+                    itemFullInventory.setQuantity(itemFullInventory.getQuantity() + itemToTrade.getQuantity());
+                    break;
+                }
+            }
+        }
+        return fullInventory;
     }
 }
