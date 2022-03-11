@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -96,18 +97,22 @@ public class RebelService {
         validateDuplicateItemsInRequestInventory(fromRebelItems);
         validateDuplicateItemsInRequestInventory(toRebelItems);
 
-        List<Item> fromRebelItemsToTrade = getRebelItemForTrade(fromRebel, fromRebelItems);
-        List<Item> toRebelItemsToTrade = getRebelItemForTrade(toRebel, toRebelItems);
+        List<Item> fromRebelItemsToTrade = new ArrayList<>(getRebelItemForTrade(fromRebel, fromRebelItems));
+        List<Item> toRebelItemsToTrade = new ArrayList<>(getRebelItemForTrade(toRebel, toRebelItems));
 
-        int fromRebelItemsPoints = getSumOfItemPoints(fromRebelItemsToTrade);
-        int toRebelItemsPoints = getSumOfItemPoints(toRebelItemsToTrade);
+        int fromRebelItemsPoints = getSumOfItemPoints(fromRebelItems);
+        int toRebelItemsPoints = getSumOfItemPoints(toRebelItems);
 
         if (toRebelItemsPoints != fromRebelItemsPoints) {
             throw new InvalidTradeException("The sum of rebel item points are not equivalent.");
         }
 
-        System.out.println(fromRebelItemsToTrade.get(0).getId());
+       addTradeItems(fromRebel.getInventory().getItems(), toRebelItems);
+       removeTradeItems(fromRebel.getInventory().getItems(), fromRebelItems);
+       addTradeItems(toRebel.getInventory().getItems(), fromRebelItems);
+       removeTradeItems(toRebel.getInventory().getItems(), toRebelItems);
 
+       rebelRepository.saveAll(List.of(fromRebel, toRebel));
     }
 
     private void checkIfRebelIsATraitor(Rebel rebel) {
@@ -149,12 +154,24 @@ public class RebelService {
 
     private int getSumOfItemPoints(List<Item> items) {
         return items.stream()
-                .map((item) -> item.getQuantity() + item.getName().value)
-                .reduce(0, (total, itemValue) -> total + itemValue );
+                .mapToInt((item) -> item.getQuantity() * item.getName().value)
+                .sum();
     }
 
-    private List<Item> subtrair(List<Item> fullInventory, List<Item> itemsToTrade) {
-        for (Item itemToTrade: itemsToTrade) {
+    private void addTradeItems(List<Item> fullInventory, List<Item> itemsToAdd) {
+        for (Item itemToTrade: itemsToAdd) {
+            for (Item itemFullInventory: fullInventory) {
+                if (itemFullInventory.getName().equals(itemToTrade.getName())) {
+                    itemFullInventory.setQuantity(itemFullInventory.getQuantity() + itemToTrade.getQuantity());
+                    itemFullInventory.getQuantity();
+                    break;
+                }
+            }
+        }
+    }
+
+    private void removeTradeItems(List<Item> fullInventory, List<Item> itemsToRemove) {
+        for (Item itemToTrade: itemsToRemove) {
             for (Item itemFullInventory: fullInventory) {
                 if (itemFullInventory.getName().equals(itemToTrade.getName())) {
                     itemFullInventory.setQuantity(itemFullInventory.getQuantity() - itemToTrade.getQuantity());
@@ -162,18 +179,5 @@ public class RebelService {
                 }
             }
         }
-        return fullInventory;
-    }
-
-    private List<Item> soma(List<Item> fullInventory, List<Item> itemsToTrade) {
-        for (Item itemToTrade: itemsToTrade) {
-            for (Item itemFullInventory: fullInventory) {
-                if (itemFullInventory.getName().equals(itemToTrade.getName())) {
-                    itemFullInventory.setQuantity(itemFullInventory.getQuantity() + itemToTrade.getQuantity());
-                    break;
-                }
-            }
-        }
-        return fullInventory;
     }
 }
