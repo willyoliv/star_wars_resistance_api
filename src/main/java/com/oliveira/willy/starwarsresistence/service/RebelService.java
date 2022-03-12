@@ -4,22 +4,19 @@ import com.oliveira.willy.starwarsresistence.exception.DuplicateItemsInventoryEx
 import com.oliveira.willy.starwarsresistence.exception.InvalidReportException;
 import com.oliveira.willy.starwarsresistence.exception.InvalidTradeException;
 import com.oliveira.willy.starwarsresistence.exception.RebelNotFoundException;
-import com.oliveira.willy.starwarsresistence.model.Item;
-import com.oliveira.willy.starwarsresistence.model.Location;
-import com.oliveira.willy.starwarsresistence.model.Rebel;
-import com.oliveira.willy.starwarsresistence.model.Report;
+import com.oliveira.willy.starwarsresistence.model.*;
 import com.oliveira.willy.starwarsresistence.model.enums.ItemInventory;
 import com.oliveira.willy.starwarsresistence.repository.RebelRepository;
 import com.oliveira.willy.starwarsresistence.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +26,8 @@ public class RebelService {
     private final ReportRepository reportRepository;
 
     private final int inventorySize = ItemInventory.values().length;
+
+    Logger logger = LoggerFactory.getLogger(RebelService.class);
 
     @Value("${maximumNumberOfReport}")
     private int maximumNumberOfReport;
@@ -97,8 +96,15 @@ public class RebelService {
         validateDuplicateItemsInRequestInventory(fromRebelItems);
         validateDuplicateItemsInRequestInventory(toRebelItems);
 
-        List<Item> fromRebelItemsToTrade = new ArrayList<>(getRebelItemForTrade(fromRebel, fromRebelItems));
-        List<Item> toRebelItemsToTrade = new ArrayList<>(getRebelItemForTrade(toRebel, toRebelItems));
+        if (!validateQuantityOfItemsInInventory(fromRebel, fromRebelItems)) {
+            throw new InvalidTradeException("The rebel ID " + fromRebel.getId() + " doesn't have enough for this trade. " +
+                    "The quantity of one of the items exceeds the saved quantity.");
+        }
+
+        if (!validateQuantityOfItemsInInventory(toRebel, toRebelItems)) {
+            throw new InvalidTradeException("The rebel ID " + toRebel.getId() + " doesn't have enough for this trade. " +
+                    "The quantity of one of the items exceeds the saved quantity.");
+        }
 
         int fromRebelItemsPoints = getSumOfItemPoints(fromRebelItems);
         int toRebelItemsPoints = getSumOfItemPoints(toRebelItems);
@@ -115,6 +121,8 @@ public class RebelService {
        rebelRepository.saveAll(List.of(fromRebel, toRebel));
     }
 
+
+
     private void checkIfRebelIsATraitor(Rebel rebel) {
         if (rebel.getInventory().isBlocked()) {
             throw new InvalidTradeException("Trade invalid. The rebel ID " + rebel.getId() + " is a traitor! Be careful!");
@@ -129,27 +137,20 @@ public class RebelService {
     }
 
     private int countDistinctItemsInInventory(List<Item> items) {
-        return items.stream()
+        return (int) items.stream()
                 .map(Item::getName)
-                .distinct()
-                .collect(Collectors.toList())
-                .size();
+                .distinct().count();
     }
 
-    private List<Item> getRebelItemForTrade(Rebel rebel, List<Item> rebelItemsFromRequest) {
-        return rebel.getInventory().getItems().stream()
-                .filter((rebelItem) -> rebelItemsFromRequest.stream()
-                        .anyMatch((itemFromRequest) -> {
+    private boolean validateQuantityOfItemsInInventory(Rebel rebel, List<Item> rebelItemsFromRequest) {
+        return rebelItemsFromRequest.stream()
+                .allMatch((itemFromRequest) -> rebel.getInventory().getItems().stream()
+                        .anyMatch((rebelItem) -> {
                             if (itemFromRequest.getName().equals(rebelItem.getName())) {
-                                if (rebelItem.getQuantity() >= itemFromRequest.getQuantity()) {
-                                    return true;
-                                } else {
-                                    throw new InvalidTradeException("The quantity of item " + itemFromRequest.getName() + " exceeds the saved quantity.");
-                                }
+                                return rebelItem.getQuantity() >= itemFromRequest.getQuantity();
                             }
                             return false;
-                        }))
-                .collect(Collectors.toList());
+                        }));
     }
 
     private int getSumOfItemPoints(List<Item> items) {
@@ -163,7 +164,6 @@ public class RebelService {
             for (Item itemFullInventory: fullInventory) {
                 if (itemFullInventory.getName().equals(itemToTrade.getName())) {
                     itemFullInventory.setQuantity(itemFullInventory.getQuantity() + itemToTrade.getQuantity());
-                    itemFullInventory.getQuantity();
                     break;
                 }
             }
@@ -180,4 +180,7 @@ public class RebelService {
             }
         }
     }
+
+
+
 }
