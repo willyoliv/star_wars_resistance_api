@@ -7,6 +7,8 @@ import com.oliveira.willy.starwarsresistence.model.Rebel;
 import com.oliveira.willy.starwarsresistence.model.enums.ItemInventory;
 import com.oliveira.willy.starwarsresistence.repository.RebelRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,23 +17,32 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class AdminPainelService {
+public class AdminService {
     private final RebelRepository rebelRepository;
+
+    Logger logger = LoggerFactory.getLogger(AdminService.class);
 
     public AdminReport issueReport() {
         List<Rebel> rebels = rebelRepository.findAll();
-        Long quantityTotal = rebelRepository.count();
+        int quantityTotal = rebels.size();
         int quantityOfTraitors = countTraitor(rebels);
-        int quantidyOfRebels = (int) (quantityTotal - quantityOfTraitors);
+        int quantityOfRebels = quantityTotal - quantityOfTraitors;
 
-        calculateAverageOfItemsPerRebel(rebels);
+        Map<ItemInventory, Double> mapAverage = calculateAverageOfItemsPerRebel(rebels);
 
-        return null;
+        int sumLostPoints = countPointdLostBecauseOfTraitors(rebels);
+
+        return AdminReport.builder()
+                .averageOfItems(mapAverage)
+                .percentageOfRebels((double) quantityOfRebels / quantityTotal)
+                .percentageOfTraitors((double) quantityOfTraitors / quantityTotal)
+                .pointsLostBecauseTraitors(sumLostPoints)
+                .build();
     }
 
     private int countTraitor(List<Rebel> rebels) {
-        return (int) rebels.stream().map(Rebel::getInventory)
-                .filter((inventory -> inventory.isBlocked())).count();
+        return rebels.stream().map(Rebel::getInventory)
+                .filter((inventory -> inventory.isBlocked())).collect(Collectors.toList()).size();
     }
 
     private Map<ItemInventory, Double> calculateAverageOfItemsPerRebel(List<Rebel> rebels) {
@@ -43,11 +54,15 @@ public class AdminPainelService {
         Map<ItemInventory, Double> itemInventoryMap = items.stream()
                 .collect(Collectors.groupingBy(Item::getName, Collectors.averagingInt(Item::getQuantity)));
 
-        System.out.println(itemInventoryMap.toString());
         return itemInventoryMap;
     }
 
-    private int countPointdLostBecauseOfTraitors() {
-        return 1;
+    private int countPointdLostBecauseOfTraitors(List<Rebel> rebels) {
+        int sum = rebels.stream().map(Rebel::getInventory)
+                .filter((inventory -> inventory.isBlocked()))
+                .map(Inventory::getItems)
+                .flatMap(List::stream).collect(Collectors.toList())
+                .stream().mapToInt(Item::getQuantity).sum();
+        return sum;
     }
 }

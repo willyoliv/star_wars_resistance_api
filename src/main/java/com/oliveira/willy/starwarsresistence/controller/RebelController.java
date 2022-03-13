@@ -4,6 +4,7 @@ import com.oliveira.willy.starwarsresistence.dto.*;
 import com.oliveira.willy.starwarsresistence.mapper.ItemMapper;
 import com.oliveira.willy.starwarsresistence.mapper.LocationMapper;
 import com.oliveira.willy.starwarsresistence.mapper.RebelMapper;
+import com.oliveira.willy.starwarsresistence.mapper.RebelResponseDtoMapper;
 import com.oliveira.willy.starwarsresistence.model.Item;
 import com.oliveira.willy.starwarsresistence.model.Location;
 import com.oliveira.willy.starwarsresistence.model.Rebel;
@@ -25,19 +26,28 @@ public class RebelController {
 
     private final RebelMapper rebelMapper;
 
+    private final RebelResponseDtoMapper rebelResponseDtoMapper;
+
     private final LocationMapper locationMapper;
 
     private final ItemMapper itemMapper;
 
     @GetMapping
-    private ResponseEntity<List<Rebel>> findAll() {
-        return new ResponseEntity<>(rebelService.findAll(), HttpStatus.OK);
+    private ResponseEntity<List<RebelResponseDto>> findAll() {
+        List<Rebel> rebels = rebelService.findAll();
+        return new ResponseEntity<>(rebels.stream().map(rebelResponseDtoMapper::rebelToRebelResponseDto).collect(Collectors.toList()), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/{rebelId}")
+    private ResponseEntity<RebelResponseDto> findRebelById(@PathVariable("rebelId") Long rebelId) {
+        RebelResponseDto rebelResponseDto = rebelResponseDtoMapper.rebelToRebelResponseDto(rebelService.findRebelById(rebelId));
+        return new ResponseEntity<>(rebelResponseDto, HttpStatus.OK);
     }
 
     @PostMapping
-    private ResponseEntity<Rebel> saveRebel(@Valid @RequestBody RebelCreateDto rebelCreateDto) {
+    private ResponseEntity<RebelResponseDto> saveRebel(@Valid @RequestBody RebelCreateDto rebelCreateDto) {
         Rebel rebel = rebelMapper.rebelDTOToRebel(rebelCreateDto);
-        return new ResponseEntity<>(rebelService.saveRebel(rebel), HttpStatus.CREATED);
+        return new ResponseEntity<>(rebelResponseDtoMapper.rebelToRebelResponseDto(rebelService.saveRebel(rebel)), HttpStatus.CREATED);
     }
 
     @PutMapping(path = "/{rebelId}/update-location")
@@ -45,17 +55,17 @@ public class RebelController {
                                                                @Valid @RequestBody LocationDto locationDto) {
         Location location = locationMapper.locationDTOToLocation(locationDto);
         rebelService.updateRebelLocation(rebelId, location);
-        return new ResponseEntity<>(new SuccessMessage("Location updated successfully"), HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessMessage("Location updated successfully."), HttpStatus.OK);
     }
 
     @PostMapping(path = "/{accuserId}/report-traitor")
     private ResponseEntity<SuccessMessage> reportRebelTraitor(@PathVariable("accuserId") Long accuserId,
                                                               @Valid @RequestBody ReportCreateDto reportCreateDto) {
         rebelService.reportRebelTraitor(accuserId, reportCreateDto.getAccusedId(), reportCreateDto.getReason());
-        return new ResponseEntity<>(new SuccessMessage("Report made successfully"), HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessMessage("Report made successfully."), HttpStatus.OK);
     }
 
-    @PostMapping(path = "/trade")
+    @PostMapping(path = "/inventory/trade")
     public ResponseEntity<SuccessMessage> tradeItemsBetweemRebels(@Valid @RequestBody TradeDto tradeDto) {
         Rebel fromRebel = rebelService.findRebelById(tradeDto.getFromRebel().getRebelId());
         Rebel toRebel = rebelService.findRebelById(tradeDto.getToRebel().getRebelId());
@@ -64,6 +74,6 @@ public class RebelController {
         List<Item> toRebelItems = tradeDto.getToRebel().getItems().stream()
                 .map(itemMapper::itemDTOToItem).collect(Collectors.toList());
         rebelService.trade(fromRebel, toRebel, fromRebelItems, toRebelItems);
-        return new ResponseEntity<>(new SuccessMessage("Trade made successfully"), HttpStatus.OK);
+        return new ResponseEntity<>(new SuccessMessage("Trade made successfully."), HttpStatus.OK);
     }
 }

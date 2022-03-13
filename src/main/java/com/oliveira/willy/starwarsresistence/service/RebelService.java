@@ -64,7 +64,7 @@ public class RebelService {
         Rebel accused = findRebelById(accusedId);
 
         if (accused.getId().equals(accuser.getId())) {
-            throw new InvalidReportException("The rebel cannot self-report");
+            throw new InvalidReportException("The rebel cannot self-report.");
         }
 
         Optional<Report> reportA = reportRepository.findByAccusedAndAccuser(accused, accuser);
