@@ -30,13 +30,13 @@ public class AdminService {
 
         Map<ItemInventory, Double> mapAverage = calculateAverageOfItemsPerRebel(rebels);
 
-        int sumLostPoints = countPointdLostBecauseOfTraitors(rebels);
+        int sumLostPoints = countLostPointsBecauseOfTraitors(rebels);
 
         return AdminReport.builder()
                 .averageOfItems(mapAverage)
                 .percentageOfRebels((double) quantityOfRebels / quantityTotal)
                 .percentageOfTraitors((double) quantityOfTraitors / quantityTotal)
-                .pointsLostBecauseTraitors(sumLostPoints)
+                .lostPoints(sumLostPoints)
                 .build();
     }
 
@@ -57,7 +57,7 @@ public class AdminService {
         return itemInventoryMap;
     }
 
-    private int countPointdLostBecauseOfTraitors(List<Rebel> rebels) {
+    private int countLostPointsBecauseOfTraitors(List<Rebel> rebels) {
         int sum = rebels.stream().map(Rebel::getInventory)
                 .filter((inventory -> inventory.isBlocked()))
                 .map(Inventory::getItems)

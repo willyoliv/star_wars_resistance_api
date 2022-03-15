@@ -14,6 +14,7 @@ public class AdminReport {
     private double percentageOfTraitors;
     private double percentageOfRebels;
     private Map<ItemInventory, Double> averageOfItems;
-    private int pointsLostBecauseTraitors;
+    private int lostPoints;
+
 
 }

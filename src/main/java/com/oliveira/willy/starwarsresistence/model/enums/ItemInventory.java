@@ -2,7 +2,7 @@ package com.oliveira.willy.starwarsresistence.model.enums;
 
 public enum ItemInventory {
     WEAPON(4),
-    MUNITION(3),
+    BULLET(3),
     WATER(2),
     FOOD(1);
 

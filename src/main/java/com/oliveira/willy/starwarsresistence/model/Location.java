@@ -31,13 +31,13 @@ public class Location {
 
     private LocalDateTime updatedAt;
 
-    @PrePersist
-    public void save() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void update() {
-        this.updatedAt = LocalDateTime.now();
-    }
+//    @PrePersist
+//    public void save() {
+//        this.createdAt = LocalDateTime.now();
+//    }
+//
+//    @PreUpdate
+//    public void update() {
+//        this.updatedAt = LocalDateTime.now();
+//    }
 }

@@ -6,9 +6,10 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Builder
 @AllArgsConstructor
 @RequiredArgsConstructor
+
+@Builder
 @Setter
 @Getter
 public class Report {

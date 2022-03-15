@@ -1,10 +1,7 @@
 package com.oliveira.willy.starwarsresistence.controller;
 
 import com.oliveira.willy.starwarsresistence.dto.*;
-import com.oliveira.willy.starwarsresistence.mapper.ItemMapper;
-import com.oliveira.willy.starwarsresistence.mapper.LocationMapper;
-import com.oliveira.willy.starwarsresistence.mapper.RebelMapper;
-import com.oliveira.willy.starwarsresistence.mapper.RebelResponseDtoMapper;
+import com.oliveira.willy.starwarsresistence.mapper.*;
 import com.oliveira.willy.starwarsresistence.model.Item;
 import com.oliveira.willy.starwarsresistence.model.Location;
 import com.oliveira.willy.starwarsresistence.model.Rebel;
@@ -30,6 +27,8 @@ public class RebelController {
 
     private final LocationMapper locationMapper;
 
+    private final LocationResponseDtoMapper locationResponseDtoMapper;
+
     private final ItemMapper itemMapper;
 
     @GetMapping
@@ -51,11 +50,11 @@ public class RebelController {
     }
 
     @PutMapping(path = "/{rebelId}/update-location")
-    private ResponseEntity<SuccessMessage> updateRebelLocation(@PathVariable("rebelId") Long rebelId,
+    private ResponseEntity<LocationResponseDto> updateRebelLocation(@PathVariable("rebelId") Long rebelId,
                                                                @Valid @RequestBody LocationDto locationDto) {
-        Location location = locationMapper.locationDTOToLocation(locationDto);
-        rebelService.updateRebelLocation(rebelId, location);
-        return new ResponseEntity<>(new SuccessMessage("Location updated successfully."), HttpStatus.OK);
+        Location location = rebelService.updateRebelLocation(rebelId, locationMapper.locationDTOToLocation(locationDto));
+        LocationResponseDto locationResponseDto = locationResponseDtoMapper.locationToLocationResponseDto(location);
+        return new ResponseEntity<>(locationResponseDto, HttpStatus.OK);
     }
 
     @PostMapping(path = "/{accuserId}/report-traitor")

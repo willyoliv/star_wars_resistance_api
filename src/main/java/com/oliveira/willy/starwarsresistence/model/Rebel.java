@@ -2,10 +2,7 @@ package com.oliveira.willy.starwarsresistence.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.oliveira.willy.starwarsresistence.model.enums.Genre;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -14,6 +11,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
 public class Rebel {

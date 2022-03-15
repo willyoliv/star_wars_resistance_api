@@ -2,16 +2,14 @@ package com.oliveira.willy.starwarsresistence.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.oliveira.willy.starwarsresistence.model.enums.ItemInventory;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
 public class Item {

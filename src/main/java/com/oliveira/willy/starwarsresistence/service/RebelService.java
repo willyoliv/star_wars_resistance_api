@@ -27,8 +27,6 @@ public class RebelService {
 
     private final int inventorySize = ItemInventory.values().length;
 
-    Logger logger = LoggerFactory.getLogger(RebelService.class);
-
     @Value("${maximumNumberOfReport}")
     private int maximumNumberOfReport;
 
@@ -51,12 +49,14 @@ public class RebelService {
         return rebelRepository.findById(id).orElseThrow(() -> new RebelNotFoundException("Rebel ID " + id + " not found!"));
     }
 
-    public void updateRebelLocation(Long rebelId, Location location) {
+    public Location updateRebelLocation(Long rebelId, Location location) {
         Rebel rebel = findRebelById(rebelId);
         location.setId(rebel.getLocation().getId());
         location.setCreatedAt(rebel.getLocation().getCreatedAt());
         rebel.setLocation(location);
         rebelRepository.save(rebel);
+
+        return rebel.getLocation();
     }
 
     public void reportRebelTraitor(Long accuserId, Long accusedId, String reason) {
