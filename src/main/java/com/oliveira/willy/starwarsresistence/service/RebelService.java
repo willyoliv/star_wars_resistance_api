@@ -6,11 +6,10 @@ import com.oliveira.willy.starwarsresistence.exception.InvalidTradeException;
 import com.oliveira.willy.starwarsresistence.exception.RebelNotFoundException;
 import com.oliveira.willy.starwarsresistence.model.*;
 import com.oliveira.willy.starwarsresistence.model.enums.ItemInventory;
+import com.oliveira.willy.starwarsresistence.repository.LocationRepository;
 import com.oliveira.willy.starwarsresistence.repository.RebelRepository;
 import com.oliveira.willy.starwarsresistence.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +22,8 @@ import java.util.Optional;
 public class RebelService {
     private final RebelRepository rebelRepository;
 
+    private final LocationRepository locationRepository;
+
     private final ReportRepository reportRepository;
 
     private final int inventorySize = ItemInventory.values().length;
@@ -30,7 +31,7 @@ public class RebelService {
     @Value("${maximumNumberOfReport}")
     private int maximumNumberOfReport;
 
-    public List<Rebel> findAll() {
+    public List<Rebel> findAllRebels() {
         return rebelRepository.findAll();
     }
 
@@ -53,22 +54,18 @@ public class RebelService {
         Rebel rebel = findRebelById(rebelId);
         location.setId(rebel.getLocation().getId());
         location.setCreatedAt(rebel.getLocation().getCreatedAt());
-        rebel.setLocation(location);
-        rebelRepository.save(rebel);
 
-        return rebel.getLocation();
+        return locationRepository.save(location);
     }
 
-    public void reportRebelTraitor(Long accuserId, Long accusedId, String reason) {
-        Rebel accuser = findRebelById(accuserId);
-        Rebel accused = findRebelById(accusedId);
+    public void reportRebelTraitor(Rebel accuser, Rebel accused, String reason) {
 
         if (accused.getId().equals(accuser.getId())) {
             throw new InvalidReportException("The rebel cannot self-report.");
         }
 
-        Optional<Report> reportA = reportRepository.findByAccusedAndAccuser(accused, accuser);
-        if (!reportA.isEmpty()) {
+        Optional<Report> accuserFound = reportRepository.findByAccusedAndAccuser(accused, accuser);
+        if (!accuserFound.isEmpty()) {
             throw new InvalidReportException("Report already registered. It is not possible to report this rebel again.");
         }
 

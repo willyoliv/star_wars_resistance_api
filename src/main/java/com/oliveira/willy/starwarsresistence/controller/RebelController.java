@@ -33,7 +33,7 @@ public class RebelController {
 
     @GetMapping
     private ResponseEntity<List<RebelResponseDto>> findAll() {
-        List<Rebel> rebels = rebelService.findAll();
+        List<Rebel> rebels = rebelService.findAllRebels();
         return new ResponseEntity<>(rebels.stream().map(rebelResponseDtoMapper::rebelToRebelResponseDto).collect(Collectors.toList()), HttpStatus.OK);
     }
 
@@ -60,7 +60,9 @@ public class RebelController {
     @PostMapping(path = "/{accuserId}/report-traitor")
     private ResponseEntity<SuccessMessage> reportRebelTraitor(@PathVariable("accuserId") Long accuserId,
                                                               @Valid @RequestBody ReportCreateDto reportCreateDto) {
-        rebelService.reportRebelTraitor(accuserId, reportCreateDto.getAccusedId(), reportCreateDto.getReason());
+        Rebel accuser = this.rebelService.findRebelById(accuserId);
+        Rebel accused = this.rebelService.findRebelById(reportCreateDto.getAccusedId());
+        rebelService.reportRebelTraitor(accuser, accused, reportCreateDto.getReason());
         return new ResponseEntity<>(new SuccessMessage("Report made successfully."), HttpStatus.OK);
     }
 

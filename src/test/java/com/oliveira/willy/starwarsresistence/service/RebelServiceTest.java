@@ -1,33 +1,32 @@
 package com.oliveira.willy.starwarsresistence.service;
 
 import com.oliveira.willy.starwarsresistence.exception.DuplicateItemsInventoryException;
+import com.oliveira.willy.starwarsresistence.exception.InvalidReportException;
 import com.oliveira.willy.starwarsresistence.exception.RebelNotFoundException;
-import com.oliveira.willy.starwarsresistence.model.Inventory;
-import com.oliveira.willy.starwarsresistence.model.Item;
-import com.oliveira.willy.starwarsresistence.model.Location;
-import com.oliveira.willy.starwarsresistence.model.Rebel;
+import com.oliveira.willy.starwarsresistence.model.*;
 import com.oliveira.willy.starwarsresistence.model.enums.Genre;
 import com.oliveira.willy.starwarsresistence.model.enums.ItemInventory;
+import com.oliveira.willy.starwarsresistence.repository.LocationRepository;
 import com.oliveira.willy.starwarsresistence.repository.RebelRepository;
 import com.oliveira.willy.starwarsresistence.repository.ReportRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@DataJpaTest
-@ExtendWith(SpringExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 @DisplayName("Rebel Service Test")
 class RebelServiceTest {
 
@@ -38,17 +37,24 @@ class RebelServiceTest {
     private RebelRepository rebelRepository;
 
     @Mock
+    private LocationRepository locationRepository;
+
+    @Mock
     private ReportRepository reportRepository;
 
+    @Value("${maximumNumberOfReport}")
+    private int maximumNumberOfReport;
+
     @BeforeEach
-    void init(){
-        rebelService = new RebelService(rebelRepository, reportRepository);
+    void init() {
+        MockitoAnnotations.openMocks(this);
+        rebelService = new RebelService(rebelRepository, locationRepository, reportRepository);
     }
 
     @Test
     @DisplayName("Save rebel when successful")
-    void save_PersistRebel_whenSuccessful() {
-        Rebel rebelToBeSaved = this.createRebel();
+    void saveRebel_WhenSuccessful() {
+        Rebel rebelToBeSaved = this.createRebel(1L);
 
         Mockito.when(rebelService.saveRebel(rebelToBeSaved)).thenReturn(rebelToBeSaved);
 
@@ -63,8 +69,8 @@ class RebelServiceTest {
     }
 
     @Test
-    @DisplayName("Save rebel thow DuplicateItemsInventoryException when the list of items has less than four items")
-    void save_ThrowDuplicateItemsInventoryException() {
+    @DisplayName("Save rebel throw DuplicateItemsInventoryException when the list of items has less than four items")
+    void saveRebel_ThrowDuplicateItemsInventoryException() {
         Rebel rebel = new Rebel();
         Inventory inventory = new Inventory();
         inventory.setItems(new ArrayList<>());
@@ -77,8 +83,8 @@ class RebelServiceTest {
 
     @Test
     @DisplayName("Find Rebel by id with successful")
-    void finbById_whenSuccessful() {
-        Rebel rebel = createRebel();
+    void findRebelById_WhenSuccessful() {
+        Rebel rebel = createRebel(1L);
 
         Mockito.when(this.rebelRepository.findById(rebel.getId())).thenReturn(Optional.of(rebel));
 
@@ -93,58 +99,127 @@ class RebelServiceTest {
     }
 
     @Test
-    @DisplayName("Find Rebel thow RebelNotFoundException")
-    void finbById_ThowRebelNotFoundException() {
+    @DisplayName("Find Rebel by id throw RebelNotFoundException")
+    void findRebelById_ThrowRebelNotFoundException() {
 
         Assertions.assertThatExceptionOfType(RebelNotFoundException.class)
-                .isThrownBy(() -> this.rebelService.findRebelById(createRebel().getId()))
+                .isThrownBy(() -> this.rebelService.findRebelById(createRebel(1L).getId()))
                 .withMessageContaining("Rebel ID 1 not found!");
 
     }
 
     @Test
-    @DisplayName("Find All returns empty list when no rebel is found")
-    void findAll_ReturnsEmptyList_WhenRebelIsNotFound() {
-        List<Rebel> rebels = this.rebelService.findAll();
+    @DisplayName("Find All Rebels returns empty list when no rebel is found")
+    void findAllRebels_ReturnsEmptyList_WhenRebelIsNotFound() {
+        List<Rebel> rebels = this.rebelService.findAllRebels();
 
         Assertions.assertThat(rebels).isEmpty();
     }
 
     @Test
-    @DisplayName("Find All returns list of rebels when successful")
-    void findAll_ReturnsListOfRebels_WhenSuccessful() {
-        Rebel rebel = this.createRebel();
+    @DisplayName("Find All Rebels returns list of rebels when successful")
+    void findAllRebels_ReturnsListOfRebels_WhenSuccessful() {
+        Rebel rebel = this.createRebel(1L);
 
         List<Rebel> rebels = List.of(rebel);
 
-        Mockito.when(this.rebelService.findAll()).thenReturn(rebels);
+        Mockito.when(this.rebelService.findAllRebels()).thenReturn(rebels);
 
-        List<Rebel> savedRebels = this.rebelService.findAll();
+        List<Rebel> savedRebels = this.rebelService.findAllRebels();
 
         Assertions.assertThat(savedRebels).isNotEmpty().contains(rebel);
     }
 
     @Test
-    @DisplayName("Update location")
+    @DisplayName("Update Rebel Location")
     void updateRebelLocation() {
-//        Rebel rebel = Rebel.builder().name("Willy");
-//        Rebel rebel = this.createRebel();
-//        Location location = rebel.getLocation();
-//        location.setGalaxyName("New Location");
-//        location.setLatitude(54321L);
-//        location.setLongitude(12345L);
-//
-//        Mockito.when(this.rebelRepository.findById(rebel.getId())).thenReturn(Optional.of(rebel));
-//
-//        this.rebelService.updateRebelLocation(rebel.getId(), rebel.getLocation());
-//
-//        Mockito.verify(this.rebelRepository.save(rebel), Mockito.times(1));
+        Rebel rebel = this.createRebel(1L);
+        Location locationToBeSaved = Location.builder()
+                .id(1L)
+                .galaxyName("New Location")
+                .latitude(54321L)
+                .longitude(12345L)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        Mockito.when(this.rebelRepository.findById(rebel.getId())).thenReturn(Optional.of(rebel));
+
+        Mockito.when(this.locationRepository.save(locationToBeSaved)).thenReturn(locationToBeSaved);
+
+        Location updatedLocation = this.rebelService.updateRebelLocation(rebel.getId(), locationToBeSaved);
+
+        Assertions.assertThat(updatedLocation).isNotNull();
+        Assertions.assertThat(updatedLocation.getGalaxyName()).isEqualTo("New Location");
+        Assertions.assertThat(updatedLocation.getLatitude()).isEqualTo(54321L);
+        Assertions.assertThat(updatedLocation.getLongitude()).isEqualTo(12345L);
+
+    }
+
+    @Test
+    @DisplayName("Report Rebel Traitor when successful")
+    void reportRebelTraitor_WhenSuccessful() {
+        Rebel accuser = this.createRebel(1L);
+        Rebel accused = this.createRebel(2L);
+
+        this.rebelService.reportRebelTraitor(accuser, accused, "reason text");
+
+        System.out.println(accused.getReport().size());
+        Assertions.assertThat(accused.getReport()).isNotEmpty();
+        Assertions.assertThat(accused.getReport().get(0).getReason()).isEqualTo("reason text");
+        Assertions.assertThat(accused.getReport().get(0).getAccuser()).isEqualTo(accuser);
+
+    }
+
+    @Test
+    @DisplayName("Report Rebel Traitor throw invalid report exception when the rebel tries to self-report")
+    void reportRebelTraitor_ThrowInvalidReportException_WhenRebelTriesToSelfReport() {
+        Rebel rebel = this.createRebel(1L);
+
+        Assertions.assertThatExceptionOfType(InvalidReportException.class)
+                .isThrownBy(() -> this.rebelService.reportRebelTraitor(rebel, rebel, "reason text"))
+                .withMessageContaining("The rebel cannot self-report.");
+
+    }
+
+    @Test
+    @DisplayName("Report Rebel Traitor throw invalid report exception when report already registered")
+    void reportRebelTraitor_ThrowInvalidReportException_WhenReportAlreadyRegistered() {
+        Rebel accuser = this.createRebel(1L);
+        Rebel accused = this.createRebel(2L);
+
+        Mockito.when(this.reportRepository.findByAccusedAndAccuser(accused, accuser)).thenReturn(Optional.ofNullable(createReport(accused, accuser)));
+
+        Assertions.assertThatExceptionOfType(InvalidReportException.class)
+                .isThrownBy(() -> this.rebelService.reportRebelTraitor(accuser, accused, "reason text"))
+                .withMessageContaining("Report already registered. It is not possible to report this rebel again.");
+
+    }
+
+    @Test
+    @DisplayName("Report Rebel Traitor throw invalid report exception when report already registered")
+    void reportRebelTraitor_ThrowInvalidReportException_WhenRebe() {
+
+        Rebel accuser = this.createRebel(1L);
+        Rebel accused = this.createRebel(2L);
+        Rebel rebel1 = this.createRebel(3L);
+        Rebel rebel2 = this.createRebel(4L);
+
+        accused.getReport().add(createReport(accused, rebel1));
+        accused.getReport().add(createReport(accused, rebel2));
+
+        this.rebelService.reportRebelTraitor(accuser, accused, "reason text");
+
+        Assertions.assertThat(accused.getReport()).isNotEmpty();
+        Assertions.assertThat(accused.getReport().size()).isEqualTo(maximumNumberOfReport);
+        Assertions.assertThat(accused.getInventory().isBlocked()).isEqualTo(true);
+
     }
 
 
-    private Rebel createRebel() {
+
+    private Rebel createRebel(Long id) {
         return Rebel.builder()
-                .id(1L)
+                .id(id)
                 .name("Rebel")
                 .age(20)
                 .genre(Genre.MALE)
@@ -153,6 +228,7 @@ class RebelServiceTest {
                         .galaxyName("Test")
                         .latitude(123123L)
                         .longitude(123123L)
+                        .createdAt(LocalDateTime.now())
                         .build())
                 .inventory(Inventory.builder()
                         .id(1L)
@@ -163,7 +239,7 @@ class RebelServiceTest {
                         .build())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(null)
-                .report(null)
+                .report(new ArrayList<>())
                 .build();
     }
 
@@ -173,6 +249,14 @@ class RebelServiceTest {
                 Item.builder().id(3L).name(ItemInventory.FOOD).quantity(2).build(),
                 Item.builder().id(4L).name(ItemInventory.BULLET).quantity(2).build()
         );
+    }
+
+    private Report createReport(Rebel accused, Rebel accuser) {
+        return Report.builder()
+                .accused(accused)
+                .accuser(accuser)
+                .reason("reason text")
+                .build();
     }
 
 }
