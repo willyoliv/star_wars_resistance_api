@@ -10,5 +10,5 @@ import java.util.Optional;
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
-    Optional<Report> findByAccusedAndAccuser(Rebel accusedId, Rebel accuserId);
+    Optional<Report> findByAccusedAndAccuser(Rebel accused, Rebel accuser);
 }
