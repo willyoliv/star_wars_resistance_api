@@ -20,8 +20,6 @@ import java.util.stream.Collectors;
 public class AdminService {
     private final RebelRepository rebelRepository;
 
-    Logger logger = LoggerFactory.getLogger(AdminService.class);
-
     public AdminReport issueReport() {
         List<Rebel> rebels = rebelRepository.findAll();
         int quantityTotal = rebels.size();
@@ -41,13 +39,13 @@ public class AdminService {
     }
 
     private int countTraitor(List<Rebel> rebels) {
-        return rebels.stream().map(Rebel::getInventory)
-                .filter((inventory -> inventory.isBlocked())).collect(Collectors.toList()).size();
+        return rebels.stream().filter(Rebel::isTraitor).collect(Collectors.toList()).size();
     }
 
     private Map<ItemInventory, Double> calculateAverageOfItemsPerRebel(List<Rebel> rebels) {
-        List<Item> items = rebels.stream().map(Rebel::getInventory)
-                .filter((inventory -> !inventory.isBlocked()))
+
+        List<Item> items = rebels.stream().filter((rebel -> !rebel.isTraitor()))
+                .map(Rebel::getInventory)
                 .map(Inventory::getItems)
                 .flatMap(List::stream).collect(Collectors.toList());
 
@@ -58,8 +56,8 @@ public class AdminService {
     }
 
     private int countLostPointsBecauseOfTraitors(List<Rebel> rebels) {
-        int sum = rebels.stream().map(Rebel::getInventory)
-                .filter((inventory -> inventory.isBlocked()))
+        int sum = rebels.stream().filter(Rebel::isTraitor)
+                .map(Rebel::getInventory)
                 .map(Inventory::getItems)
                 .flatMap(List::stream).collect(Collectors.toList())
                 .stream().mapToInt(Item::getQuantity).sum();

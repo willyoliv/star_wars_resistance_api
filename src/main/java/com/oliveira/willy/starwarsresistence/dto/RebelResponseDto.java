@@ -23,4 +23,6 @@ public class RebelResponseDto {
     private InventoryResponseDto inventory;
 
     private List<ReportResponseDto> report;
+
+    private boolean traitor;
 }

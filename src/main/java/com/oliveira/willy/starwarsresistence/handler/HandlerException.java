@@ -46,7 +46,7 @@ public class HandlerException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(ExceptionDetails.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
-                .title("Invalid report Exception, Report invalid")
+                .title("Duplicate items inventory Exception")
                 .details(duplicateItemsInventoryException.getMessage())
                 .developerMessage(duplicateItemsInventoryException.getClass().getName())
                 .build(), HttpStatus.BAD_REQUEST);

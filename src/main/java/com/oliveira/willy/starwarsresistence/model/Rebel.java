@@ -39,12 +39,16 @@ public class Rebel {
     @JsonManagedReference
     private List<Report> report;
 
+    private boolean isTraitor;
+
     private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
 
     @PrePersist
     public void save() {
         this.createdAt = LocalDateTime.now();
+        this.isTraitor = false;
     }
 
     @PreUpdate

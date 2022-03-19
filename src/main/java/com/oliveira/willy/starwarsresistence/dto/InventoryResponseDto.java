@@ -12,6 +12,4 @@ public class InventoryResponseDto {
     private Long id;
 
     private List<ItemDto> items;
-
-    private boolean blocked;
 }

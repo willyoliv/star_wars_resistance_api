@@ -10,6 +10,8 @@ import com.oliveira.willy.starwarsresistence.repository.LocationRepository;
 import com.oliveira.willy.starwarsresistence.repository.RebelRepository;
 import com.oliveira.willy.starwarsresistence.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,8 @@ public class RebelService {
 
     private final int inventorySize = ItemInventory.values().length;
 
+    Logger logger = LoggerFactory.getLogger(RebelService.class);
+
     @Value("${maximumNumberOfReport}")
     private int maximumNumberOfReport;
 
@@ -40,6 +44,7 @@ public class RebelService {
         int itemsInRebelInventorySize = countDistinctItemsInInventory(rebel.getInventory().getItems());
 
         if (itemsInRebelInventorySize != inventorySize) {
+            logger.error("There are duplicate items in the inventory");
             throw new DuplicateItemsInventoryException("There are duplicate items in the inventory");
         }
         rebel.getInventory().setInventoryToItem();
@@ -77,7 +82,7 @@ public class RebelService {
         accused.getReport().add(report);
 
         if (accused.getReport().size() == maximumNumberOfReport) {
-            accused.getInventory().setBlocked(true);
+            accused.setTraitor(true);
         }
         rebelRepository.save(accused);
     }
@@ -121,7 +126,7 @@ public class RebelService {
 
 
     private void checkIfRebelIsATraitor(Rebel rebel) {
-        if (rebel.getInventory().isBlocked()) {
+        if (rebel.isTraitor()) {
             throw new InvalidTradeException("Trade invalid. The rebel ID " + rebel.getId() + " is a traitor! Be careful!");
         }
     }

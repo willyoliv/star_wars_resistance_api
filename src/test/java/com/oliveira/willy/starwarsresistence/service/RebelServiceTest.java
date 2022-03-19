@@ -20,8 +20,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 
 @RunWith(MockitoJUnitRunner.class)
-@TestPropertySource(properties = {"maximumNumberOfReport = 3"})
 @DisplayName("Rebel Service Test")
 class RebelServiceTest {
 
@@ -44,9 +41,6 @@ class RebelServiceTest {
 
     @Mock
     private ReportRepository reportRepository;
-
-    @Value("${maximumNumberOfReport}")
-    private int maximumNumberOfReport;
 
     @BeforeEach
     void init() {
@@ -200,7 +194,7 @@ class RebelServiceTest {
 
 //    @Test
 //    @DisplayName("Report Rebel Traitor throw invalid report exception when report already registered")
-//    void reportRebelTraitor_ThrowInvalidReportException_WhenRebe() {
+//    void reportRebelTraitor_ThrowInvalidReportException_WhenRebel() {
 //
 //        Rebel accuser = this.createRebel(1L);
 //        Rebel accused = this.createRebel(2L);
@@ -221,11 +215,96 @@ class RebelServiceTest {
     @DisplayName("Trade throw invalid trade exception when the rebel tries to trade with himself")
     void trade_ThrowInvalidTradeException_WhenTheRebelTriesToTradeWithHimself() {
         Rebel rebel = createRebel(1l);
-        List<Item> items = createItemList();
+        
+        Assertions.assertThatExceptionOfType(InvalidTradeException.class)
+                .isThrownBy(() -> this.rebelService.trade(rebel, rebel, rebel.getInventory().getItems(), rebel.getInventory().getItems()))
+                .withMessageContaining("The rebel cannot trade with himself.");
+    }
+
+    @Test
+    @DisplayName("Trade throw invalid trade exception when the rebel is traitor")
+    void trade_ThrowInvalidTradeException_WhenTheRebelIsTraitor() {
+        Rebel fromRebel = createRebel(1l);
+        fromRebel.setTraitor(true);
+        Rebel toRebel = createRebel(2l);
 
         Assertions.assertThatExceptionOfType(InvalidTradeException.class)
-                .isThrownBy(() -> this.rebelService.trade(rebel, rebel, items, items))
-                .withMessageContaining("The rebel cannot trade with himself.");
+                .isThrownBy(() -> this.rebelService.trade(fromRebel, toRebel, fromRebel.getInventory().getItems(), toRebel.getInventory().getItems()))
+                .withMessageContaining("Trade invalid. The rebel ID 1 is a traitor! Be careful!");
+    }
+
+    @Test
+    @DisplayName("Trade throw duplicate items inventory exception when the fromRebel passed repeat items for trade")
+    void trade_ThrowDuplicateItemsInventoryException_WhenTheFromRebelPassedRepeatItemsForTrade() {
+        Rebel fromRebel = createRebel(1l);
+        Rebel toRebel = createRebel(2l);
+        List<Item> listWithDuplicateItems = createItemListWithDuplicateItems();
+
+        Assertions.assertThatExceptionOfType(DuplicateItemsInventoryException.class)
+                .isThrownBy(() -> this.rebelService.trade(fromRebel, toRebel, listWithDuplicateItems, toRebel.getInventory().getItems()))
+                .withMessageContaining("Cannot pass duplicate items for trade.");
+    }
+
+    @Test
+    @DisplayName("Trade throw duplicate items inventory exception when the toRebel passed repeat items for trade")
+    void trade_ThrowDuplicateItemsInventoryException_WhenTheToRebelPassedRepeatItemsForTrade() {
+        Rebel fromRebel = createRebel(1l);
+        Rebel toRebel = createRebel(2l);
+        List<Item> toRebelItemListWithDuplicateItems = createItemListWithDuplicateItems();
+
+        Assertions.assertThatExceptionOfType(DuplicateItemsInventoryException.class)
+                .isThrownBy(() -> this.rebelService.trade(fromRebel, toRebel, fromRebel.getInventory().getItems(), toRebelItemListWithDuplicateItems))
+                .withMessageContaining("Cannot pass duplicate items for trade.");
+    }
+
+    @Test
+    @DisplayName("Trade throw invalid trade exception when the fromRebel does not have the quantity of items provided for the trade")
+    void trade_ThrowInvalidTradeException_WhenTheFromRebelDoesNotHaveTheQuantityOfItemsProvidedForTrade() {
+        Rebel fromRebel = createRebel(1l);
+        Rebel toRebel = createRebel(2l);
+        List<Item> fromRebelItems = createItemList(2, 2, 2, 2);
+
+        Assertions.assertThatExceptionOfType(InvalidTradeException.class)
+                .isThrownBy(() -> this.rebelService.trade(fromRebel, toRebel, fromRebelItems, toRebel.getInventory().getItems()))
+                .withMessageContaining("The rebel ID 1 doesn't have enough for this trade. " +
+                        "The quantity of one of the items exceeds the saved quantity.");
+    }
+
+    @Test
+    @DisplayName("Trade throw invalid trade exception when the toRebel does not have the quantity of items provided for the trade")
+    void trade_ThrowInvalidTradeException_WhenTheToRebelDoesNotHaveTheQuantityOfItemsProvidedForTrade() {
+        Rebel fromRebel = createRebel(1l);
+        Rebel toRebel = createRebel(2l);
+        List<Item> toRebelItems = createItemList( 2, 2, 2, 2);
+
+        Assertions.assertThatExceptionOfType(InvalidTradeException.class)
+                .isThrownBy(() -> this.rebelService.trade(fromRebel, toRebel, fromRebel.getInventory().getItems(), toRebelItems))
+                .withMessageContaining("The rebel ID 2 doesn't have enough for this trade. " +
+                        "The quantity of one of the items exceeds the saved quantity.");
+    }
+
+    @Test
+    @DisplayName("Trade throw invalid trade exception when The sum of rebel item points are not equivalent")
+    void trade_ThrowInvalidTradeException_WhenTheSumOfRebelItemPointsAreNotEquivalent() {
+        Rebel fromRebel = createRebel(1l);
+        Rebel toRebel = createRebel(2l);
+        List<Item> fromRebelItems = createItemList(1, 0, 0, 0);
+        List<Item> toRebelItems = createItemList(0, 1, 0, 0);
+
+        Assertions.assertThatExceptionOfType(InvalidTradeException.class)
+                .isThrownBy(() -> this.rebelService.trade(fromRebel, toRebel, fromRebelItems, toRebelItems))
+                .withMessageContaining("The sum of rebel item points are not equivalent.");
+    }
+
+    @Test
+    @DisplayName("Trade when successful")
+    void trade_WhenSuccessful() {
+        Rebel fromRebel = createRebel(1l);
+        Rebel toRebel = createRebel(2l);
+        List<Item> fromRebelItems = createItemList(1, 0, 0, 0);
+        List<Item> toRebelItems = createItemList(0, 0, 1, 1);
+
+        this.rebelService.trade(fromRebel, toRebel, fromRebelItems, toRebelItems);
     }
 
     private Rebel createRebel(Long id) {
@@ -234,6 +313,7 @@ class RebelServiceTest {
                 .name("Rebel")
                 .age(20)
                 .genre(Genre.MALE)
+                .isTraitor(false)
                 .location(Location.builder()
                         .id(1L)
                         .galaxyName("Test")
@@ -243,8 +323,7 @@ class RebelServiceTest {
                         .build())
                 .inventory(Inventory.builder()
                         .id(1L)
-                        .isBlocked(false)
-                        .items(createItemList())
+                        .items(createItemList(1, 1, 1, 1))
                         .createdAt(LocalDateTime.now())
                         .updatedAt(null)
                         .build())
@@ -254,11 +333,19 @@ class RebelServiceTest {
                 .build();
     }
 
-    private List<Item> createItemList() {
-        return List.of(Item.builder().id(1L).name(ItemInventory.WEAPON).quantity(2).build(),
-                Item.builder().id(2L).name(ItemInventory.WATER).quantity(2).build(),
-                Item.builder().id(3L).name(ItemInventory.FOOD).quantity(2).build(),
-                Item.builder().id(4L).name(ItemInventory.BULLET).quantity(2).build()
+    private List<Item> createItemListWithDuplicateItems() {
+        return List.of(Item.builder().id(1L).name(ItemInventory.WEAPON).quantity(1).build(),
+                Item.builder().id(1L).name(ItemInventory.WEAPON).quantity(1).build(),
+                Item.builder().id(3L).name(ItemInventory.FOOD).quantity(1).build(),
+                Item.builder().id(4L).name(ItemInventory.BULLET).quantity(1).build()
+        );
+    }
+
+    private List<Item> createItemList(int weaponQuantity, int waterQuantity, int foodQuantity, int bulletQuantity) {
+        return List.of(Item.builder().id(1L).name(ItemInventory.WEAPON).quantity(weaponQuantity).build(),
+                Item.builder().id(2L).name(ItemInventory.WATER).quantity(waterQuantity).build(),
+                Item.builder().id(3L).name(ItemInventory.FOOD).quantity(foodQuantity).build(),
+                Item.builder().id(4L).name(ItemInventory.BULLET).quantity(bulletQuantity).build()
         );
     }
 

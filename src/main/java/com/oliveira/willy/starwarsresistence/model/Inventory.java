@@ -28,8 +28,6 @@ public class Inventory {
     @JsonBackReference
     private Rebel rebel;
 
-    private boolean isBlocked;
-
     public void setInventoryToItem() {
         if (!items.isEmpty()) {
             for (Item item : items) {
@@ -44,7 +42,6 @@ public class Inventory {
     @PrePersist
     public void save() {
         this.createdAt = LocalDateTime.now();
-        this.isBlocked = false;
     }
 
     @PreUpdate
