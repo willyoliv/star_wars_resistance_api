@@ -16,8 +16,8 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    @GetMapping(path = "/issue-report")
-    public ResponseEntity<AdminReport> issueReport() {
-        return new ResponseEntity<>(adminService.issueReport(), HttpStatus.OK);
+    @GetMapping(path = "/report")
+    public ResponseEntity<AdminReport> report() {
+        return new ResponseEntity<>(adminService.report(), HttpStatus.OK);
     }
 }

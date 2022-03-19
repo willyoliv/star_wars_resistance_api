@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class AdminService {
     private final RebelRepository rebelRepository;
 
-    public AdminReport issueReport() {
+    public AdminReport report() {
         List<Rebel> rebels = rebelRepository.findAll();
         int quantityTotal = rebels.size();
         int quantityOfTraitors = countTraitor(rebels);
