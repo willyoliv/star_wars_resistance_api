@@ -29,11 +29,13 @@ public class AdminService {
         Map<ItemInventory, Double> mapAverage = calculateAverageOfItemsPerRebel(rebels);
 
         int sumLostPoints = countLostPointsBecauseOfTraitors(rebels);
+        Double percentageOfRebels = (double) quantityOfRebels / quantityTotal;
+        Double percentageOfTraitors = (double) quantityOfTraitors / quantityTotal;
 
         return AdminReport.builder()
                 .averageOfItems(mapAverage)
-                .percentageOfRebels((double) quantityOfRebels / quantityTotal)
-                .percentageOfTraitors((double) quantityOfTraitors / quantityTotal)
+                .percentageOfRebels(Double.isNaN(percentageOfRebels) ? 0.0 : percentageOfRebels)
+                .percentageOfTraitors(Double.isNaN(percentageOfTraitors) ? 0.0 : percentageOfTraitors)
                 .lostPoints(sumLostPoints)
                 .build();
     }

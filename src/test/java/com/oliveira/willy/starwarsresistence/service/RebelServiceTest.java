@@ -192,25 +192,6 @@ class RebelServiceTest {
 
     }
 
-//    @Test
-//    @DisplayName("Report Rebel Traitor throw invalid report exception when report already registered")
-//    void reportRebelTraitor_ThrowInvalidReportException_WhenRebel() {
-//
-//        Rebel accuser = this.createRebel(1L);
-//        Rebel accused = this.createRebel(2L);
-//        Rebel rebel1 = this.createRebel(3L);
-//        Rebel rebel2 = this.createRebel(4L);
-//
-//        accused.getReport().add(createReport(accused, rebel1));
-//        accused.getReport().add(createReport(accused, rebel2));
-//
-//        this.rebelService.reportRebelTraitor(accuser, accused, "reason text");
-//
-//        Assertions.assertThat(accused.getReport()).isNotEmpty();
-//        Assertions.assertThat(accused.getReport().size()).isEqualTo(maximumNumberOfReport);
-//        Assertions.assertThat(accused.getInventory().isBlocked()).isEqualTo(true);
-//    }
-
     @Test
     @DisplayName("Trade throw invalid trade exception when the rebel tries to trade with himself")
     void trade_ThrowInvalidTradeException_WhenTheRebelTriesToTradeWithHimself() {
@@ -305,6 +286,10 @@ class RebelServiceTest {
         List<Item> toRebelItems = createItemList(0, 0, 1, 1);
 
         this.rebelService.trade(fromRebel, toRebel, fromRebelItems, toRebelItems);
+        Assertions.assertThat(fromRebel.getInventory().getItems().stream().filter((item) -> item.getName().equals(ItemInventory.WEAPON)).findFirst().get().getQuantity()).isEqualTo(0);
+        Assertions.assertThat(toRebel.getInventory().getItems().stream().filter((item) -> item.getName().equals(ItemInventory.FOOD)).findFirst().get().getQuantity()).isEqualTo(0);
+        Assertions.assertThat(toRebel.getInventory().getItems().stream().filter((item) -> item.getName().equals(ItemInventory.BULLET)).findFirst().get().getQuantity()).isEqualTo(0);
+
     }
 
     private Rebel createRebel(Long id) {

@@ -11,8 +11,8 @@ import java.util.Map;
 @Builder
 @Getter
 public class AdminReport {
-    private double percentageOfTraitors;
-    private double percentageOfRebels;
+    private Double percentageOfTraitors;
+    private Double percentageOfRebels;
     private Map<ItemInventory, Double> averageOfItems;
     private int lostPoints;
 
