@@ -2,24 +2,26 @@
 
 ## Tabela de conteúdos
 <!--ts-->
-   * [Descrição do problema](#descrição-do-problema)
-   * [Requisitos do projeto](#requisitos-do-projeto)
+   * [Sobre o projeto](#sobre-o-projeto)
+   * [Requisitos do projeto](#requisitos-funcionais-do-projeto)
+   * [Executando o projeto](#executando-o-projeto)
    * [EndPoints](#endpoints)
      * [Adicionar rebelde](#adicionar-rebelde)
      * [Atualizar localização do rebelde](#atualizar-localização-do-rebelde)
-     * [Reportar o rebelde como um traidor](#reportar-o-rebelde-como-um-traidor)
+     * [Reportar um rebelde como traidor](#reportar-um-rebelde-como-traidor)
      * [Negociar itens](#negociar-itens)
+     * [Relatórios](#relatórios)
      * [Adicionais](#adicionais)
 <!--te-->
 
 
-## Descrição do problema
-Construção de uma API REST como Projeto final do Modulo **Desenvolvimento web**. <br>
+## Sobre o projeto
+Construção de uma API REST como Projeto final do Módulo **Desenvolvimento web** do curso da Let 's Code **Santander Coders Web Full Stack**. O projeto tem como principal objetivo pôr em prática os conceitos adquiridos em aula. A API foi construída com Springboot utilizando as dependências como H2 para banco em memória, JPA para criar as tabelas e relacionamentos entre as entidades, Mapper Struct para fazer o processo de mapeamento das entidades. A API também possui alguns testes de unidade.
 
 *"O império continua sua luta incessante de dominar a galáxia, tentando ao máximo expandir seu território e eliminar os rebeldes. Você, como um soldado da resistência, foi designado para desenvolver um sistema
 para compartilhar recursos entre os rebeldes."*
 
-## Requisitos do Projeto
+## Requisitos Funcionais do Projeto
 Desenvolver uma API REST, ao qual irá armazenar informação sobre os rebeldes, bem como os recursos que eles possuem. Abaixo é apresentada a listagem dos requisitos.
 
 - [X] **Adicionar rebelde**<br>Um rebelde deve ter um nome, idade, gênero, localização (latitude, longitude e nome, na galáxia, da base ao qual faz parte). Um rebelde também possui um inventário que deverá ser passado na requisição com
@@ -54,8 +56,35 @@ descrito em termo de pontos.<br>Ambos os lados deverão oferecer a mesma quantid
  3. Quantidade média de cada tipo de recurso por rebelde (Ex: 2 armas por rebelde).
  4. Pontos perdidos devido a traidores.
 
+## Executando o projeto
+Abaixo são apresentados os passos necessários para que o projeto possa ser executado.
+
+### Pré-requisitos
+O projeto foi criado utilizando o **`Gradle`** como gerenciador de dependências. Como pré-requisito principal é necessário que a versão do JAVA **`JDK 17`** esteja devidamente instalada em seu ambiente de desenvolvimento. Também será necessário utilizar alguma IDE para visualizar o código como por exemplo: Intellij (utilizada), Netbeans, Eclipse ou qualquer um editor de sua preferência. 
+
+### Rodando o projeto
+```bash
+
+# Clone este repositório
+$ git clone https://github.com/willyoliv/star_wars_resistence_api.git
+
+# Acesse a pasta do projeto no terminal/cmd
+$ cd star_wars_resistence_api
+
+# Rode o projeto
+$ ./gradlew bootRun
+
+```
+**OBS.** O projeto por padrão roda em `localhost:8080`, caso a mesma esteja sendo utilizada por outro serviço é necessário alterar o arquivo `application.yml` adicionando uma nova porta seguindo o exemplo abaixo.
+
+```
+server:
+  ...
+  port : 8081
+```
+
 ## EndPoints
-Os endpoints estão organizados seguindo a ordem dos requitidos do projeto.
+Os endpoints estão organizados seguindo a ordem dos requitidos funcionais do projeto. A documentação pode ser acessada via browser por meio da seguinte rota **`localhost:8080/starwars-resistence/swagger-ui/`**
 ### Adicionar Rebelde
 Para adicionar o rebelde é necessário informar os campos name, age, genre, location(galaxyName, latitude, longitude) e inventory(items). 
 
