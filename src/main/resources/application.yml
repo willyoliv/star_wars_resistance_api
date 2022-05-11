@@ -16,6 +16,6 @@ spring:
 
 server:
   servlet:
-    context-path: /starwars-resistence
+    context-path: /starwars-resistance
 
 maximumNumberOfReport: 3

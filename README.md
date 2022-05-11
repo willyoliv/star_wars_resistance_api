@@ -84,7 +84,7 @@ server:
 ```
 
 ## EndPoints
-Os endpoints estão organizados seguindo a ordem dos requitidos funcionais do projeto. A documentação pode ser acessada via browser por meio da seguinte rota **`localhost:8080/starwars-resistence/swagger-ui/`**
+Os endpoints estão organizados seguindo a ordem dos requitidos funcionais do projeto. A documentação pode ser acessada via browser por meio da seguinte rota **`localhost:8080/starwars-resistance/swagger-ui/`**
 ### Adicionar Rebelde
 Para adicionar o rebelde é necessário informar os campos name, age, genre, location(galaxyName, latitude, longitude) e inventory(items). 
 
@@ -92,7 +92,7 @@ Para adicionar o rebelde é necessário informar os campos name, age, genre, loc
 quatro itens `WEAPON, WATER, BULLET e FOOD` com seus respectivos valores, não podendo serem **null** ou **NEGATIVOS**. Abaixo são apresentados o endpoint e o exemplo 
 de body para realizar a adição de um novo rebelde.
 
-Método **POST** localhost:8080/starwars-resistence/rebels/
+Método **POST** localhost:8080/starwars-resistance/rebels/
 
 ```
 {
@@ -132,7 +132,7 @@ Para atualizar a localização de um rebelde é necessário informar os novos va
 
 **OBS.** O `id` deve obrigatoriamente pertencer a um rebelde existente, caso contrário a resposta para a requisição é `BAD_REQUEST`.
 
-Método **PUT** localhost:8080/starwars-resistence/rebels/**`id`**/update-location
+Método **PUT** localhost:8080/starwars-resistance/rebels/**`id`**/update-location
 ```
 {
    "galaxyName": "Novo galáxia",
@@ -147,7 +147,7 @@ na URL.
 
 **OBS.** Os `id` e `accusedId` devem obrigatoriamente pertencer a rebeldes existentes e distintos, caso contrário a resposta para a requisição é `BAD_REQUEST`.
 
-Método **POST** localhost:8080/starwars-resistence/rebels/**`id`**/report-traitor
+Método **POST** localhost:8080/starwars-resistance/rebels/**`id`**/report-traitor
 ```
 {
    "accusedId": 1,
@@ -162,7 +162,7 @@ trocar itens que não possui ou que excedem a quantidade salva. Também é bloqu
 são obrigatórios e com um detalhe para a lista de itens que deve conter pelo menos **um** item e no máximo **quatro**. Abaixo é apresentado o exemplo do body para a
 requisição e a URL para negociar os itens.
  
-Método **POST** localhost:8080/starwars-resistence/rebels/inventory/trade
+Método **POST** localhost:8080/starwars-resistance/rebels/inventory/trade
 ```
 {
    "fromRebel": {
@@ -192,7 +192,7 @@ Método **POST** localhost:8080/starwars-resistence/rebels/inventory/trade
 ### Relatórios
 Abaixo é apresentado o endpoint para obter o relatório e um exemplo de resposta para a requisição.
 
-Método **GET** localhost:8080/starwars-resistence/admin/report
+Método **GET** localhost:8080/starwars-resistance/admin/report
 ```
 {
    "percentageOfTraitors": 0.2,
@@ -211,10 +211,10 @@ Método **GET** localhost:8080/starwars-resistence/admin/report
  
   Para obter a lista completa dos rebeldes basta utilizar o endpoint abaixo.
 
-  Método **GET** localhost:8080/starwars-resistence/rebels
+  Método **GET** localhost:8080/starwars-resistance/rebels
 * **Obter rebelde pelo id**
  
   Para obter um rebelde específico basta utilizar o endpoint abaixo, onde o **`id`** de um rebelde cadastrado deve ser passado.
 
-  Método **GET** localhost:8080/starwars-resistence/rebels/**`id`**
+  Método **GET** localhost:8080/starwars-resistance/rebels/**`id`**
 
