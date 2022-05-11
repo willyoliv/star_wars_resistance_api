@@ -66,10 +66,10 @@ O projeto foi criado utilizando o **`Gradle`** como gerenciador de dependências
 ```bash
 
 # Clone este repositório
-$ git clone https://github.com/willyoliv/star_wars_resistence_api.git
+$ git clone https://github.com/willyoliv/star_wars_resistance_api.git
 
 # Acesse a pasta do projeto no terminal/cmd
-$ cd star_wars_resistence_api
+$ cd star_wars_resistance_api
 
 # Rode o projeto
 $ ./gradlew bootRun
